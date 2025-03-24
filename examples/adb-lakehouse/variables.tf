@@ -1,66 +1,47 @@
+variable "tenant_id" {
+  type        = string
+  description = "Azure Tenand ID to deploy the workspace into"
+}
+
 variable "subscription_id" {
   type        = string
   description = "Azure Subscription ID to deploy the workspace into"
 }
+
+variable "account_id" {
+  type        = string
+  description = "Databricks Account ID"
+}
+
 
 variable "location" {
   type        = string
   description = "(Required) The location for the resources in this module"
 }
 
-variable "spoke_resource_group_name" {
+variable "deploy_id" {
   type        = string
-  description = "(Required) The name of the Resource Group to create or to use"
+  description = "(Required) The global unique identifier for the owner of deployment: e.g. ag83"
 }
 
-variable "create_resource_group" {
-  type        = bool
-  description = "(Optional) Creates resource group if set to true (default)"
-  default     = true
+variable "deploy_env" {
+  type        = string
+  description = "(Required) The environment for the deployment: e.g. tf"
 }
 
-variable "managed_resource_group_name" {
+variable "deploy_prj" {
   type        = string
-  description = "(Optional) The name of the resource group where Azure should place the managed Databricks resources"
-  default     = ""
+  description = "(Required) The prject name for the deployment: e.g. test"
 }
 
-variable "project_name" {
+variable "deploy_ver" {
   type        = string
-  description = "(Required) The name of the project associated with the infrastructure to be managed by Terraform"
-}
-
-variable "environment_name" {
-  type        = string
-  description = "(Required) The name of the project environment associated with the infrastructure to be managed by Terraform"
+  description = "(Required) The version for the deployment: e.g. 001"
 }
 
 variable "spoke_vnet_address_space" {
   type        = string
   description = "(Required) The address space for the spoke Virtual Network"
-}
-
-variable "tags" {
-  type        = map(string)
-  description = "(Required) Map of tags to attach to resources"
-  default     = {}
-}
-
-variable "databricks_workspace_name" {
-  type        = string
-  description = "Name of Databricks workspace"
-}
-
-variable "data_factory_name" {
-  type        = string
-  description = "The name of the Azure Data Factory to deploy. Won't be created if not specified"
-  default     = ""
-}
-
-variable "key_vault_name" {
-  type        = string
-  description = "(Required) The name of the Azure Data Factory to deploy"
-  default     = ""
 }
 
 variable "private_subnet_address_prefixes" {
@@ -73,31 +54,24 @@ variable "public_subnet_address_prefixes" {
   description = "Address space for public Databricks subnet"
 }
 
-variable "storage_account_names" {
+variable "metastore_admins" {
   type        = list(string)
-  description = "Names of the different storage accounts"
-  default     = []
+  description = "list of principals: service principals or groups that have metastore admin privileges"
 }
 
-variable "shared_resource_group_name" {
-  type        = string
-  description = "Name of the shared resource group"
+variable "tags" {
+  type        = map(string)
+  description = "(Required) Map of tags to attach to resources"
+  default     = {}
 }
 
-variable "metastore_name" {
-  type        = string
-  description = "the name of the metastore"
+
+variable "create_resource_group" {
+  type        = bool
+  description = "(Optional) Creates resource group if set to true (default)"
+  default     = true
 }
 
-variable "metastore_storage_name" {
-  type        = string
-  description = "the account storage where we create the metastore"
-}
-
-variable "access_connector_name" {
-  type        = string
-  description = "the name of the access connector"
-}
 
 variable "service_principals" {
   type = map(object({
@@ -109,37 +83,9 @@ variable "service_principals" {
   description = "list of service principals we want to create at Databricks account"
 }
 
-variable "account_groups" {
-  type = map(object({
-    group_name  = string
-    permissions = list(string)
-  }))
-  default     = {}
-  description = "list of databricks account groups we want to assign to the workspace"
-}
 
 
-variable "landing_external_location_name" {
-  type        = string
-  description = "the name of the landing external location"
-}
 
-variable "landing_adls_path" {
-  type        = string
-  description = "The ADLS path of the landing zone"
-}
 
-variable "landing_adls_rg" {
-  type        = string
-  description = "The resource group name of the landing zone"
-}
 
-variable "metastore_admins" {
-  type        = list(string)
-  description = "list of principals: service principals or groups that have metastore admin privileges"
-}
 
-variable "account_id" {
-  type        = string
-  description = "Databricks Account ID"
-}

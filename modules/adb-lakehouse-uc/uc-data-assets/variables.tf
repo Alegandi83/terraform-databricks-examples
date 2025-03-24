@@ -1,8 +1,7 @@
-variable "environment_name" {
+variable "location" {
   type        = string
-  description = "the deployment environment"
+  description = "(Required) The location for the resources in this module"
 }
-
 variable "landing_external_location_name" {
   type        = string
   description = "the name of the landing external location"
@@ -36,4 +35,9 @@ variable "metastore_admins" {
 variable "access_connector_id" {
   type        = string
   description = "the id of the access connector"
+}
+
+variable "tags" {
+  type        = map(string)
+  description = "(Required) Map of tags to attach to resources"
 }

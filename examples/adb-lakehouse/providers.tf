@@ -21,9 +21,11 @@ provider "databricks" {
   alias      = "account"
   host       = "https://accounts.azuredatabricks.net"
   account_id = var.account_id
+  azure_tenant_id = var.tenant_id
 }
 
 provider "databricks" {
   alias = "workspace"
   host  = module.adb-lakehouse.workspace_url
+  azure_tenant_id = var.tenant_id
 }

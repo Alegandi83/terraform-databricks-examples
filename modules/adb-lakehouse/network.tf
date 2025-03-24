@@ -1,5 +1,5 @@
 resource "azurerm_virtual_network" "this" {
-  name                = "VNET-${var.project_name}-${var.environment_name}"
+  name                = "vnet-${var.deploy_id}-${var.deploy_env}-${var.component_name}-${var.deploy_ver}"
   location            = var.location
   resource_group_name = local.rg_name
   address_space       = [var.spoke_vnet_address_space]
@@ -7,7 +7,7 @@ resource "azurerm_virtual_network" "this" {
 }
 
 resource "azurerm_network_security_group" "this" {
-  name                = "databricks-nsg-${var.project_name}-${var.environment_name}"
+  name                = "nsg-${var.deploy_id}-${var.deploy_env}-${var.component_name}-${var.deploy_ver}"
   location            = var.location
   resource_group_name = local.rg_name
   tags                = var.tags
@@ -15,7 +15,7 @@ resource "azurerm_network_security_group" "this" {
 
 
 resource "azurerm_route_table" "this" {
-  name                = "route-table-${var.project_name}-${var.environment_name}"
+  name                = "rt-${var.deploy_id}-${var.deploy_env}-${var.component_name}-${var.deploy_ver}"
   location            = var.location
   resource_group_name = local.rg_name
   tags                = var.tags

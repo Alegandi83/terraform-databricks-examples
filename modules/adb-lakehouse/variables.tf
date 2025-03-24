@@ -20,16 +20,31 @@ variable "managed_resource_group_name" {
   default     = ""
 }
 
-variable "project_name" {
+
+variable "deploy_id" {
   type        = string
-  description = "(Required) The name of the project associated with the infrastructure to be managed by Terraform"
+  description = "(Required) The global unique identifier for the owner of deployment: e.g. ag83"
 }
 
-variable "environment_name" {
+variable "deploy_env" {
   type        = string
-  description = "(Required) The name of the project environment associated with the infrastructure to be managed by Terraform"
+  description = "(Required) The environment for the deployment: e.g. tf"
 }
 
+variable "deploy_prj" {
+  type        = string
+  description = "(Required) The prject name for the deployment: e.g. test"
+}
+
+variable "deploy_ver" {
+  type        = string
+  description = "(Required) The version for the deployment: e.g. 001"
+}
+
+variable "component_name" {
+  type        = string
+  description = "(Required) the name of the specific component"
+}
 variable "spoke_vnet_address_space" {
   type        = string
   description = "(Required) The address space for the spoke Virtual Network"
@@ -67,8 +82,7 @@ variable "public_subnet_address_prefixes" {
   description = "Address space for public Databricks subnet"
 }
 
-variable "storage_account_names" {
-  type        = list(string)
-  description = "Names of additional storage accounts to create"
-  default     = []
+variable "storage_account_name" {
+  type        = string
+  description = "Name of workspace storage account to create"
 }

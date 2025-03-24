@@ -12,7 +12,7 @@ resource "databricks_grants" "landing-external-location-grants" {
 
 resource "databricks_grants" "catalog_bronze-grants" {
   depends_on = [databricks_catalog.bronze-catalog]
-  catalog    = "bronze_catalog_${var.environment_name}"
+  catalog    = "bronze_catalog"
   dynamic "grant" {
     for_each = toset(var.metastore_admins)
     content {
