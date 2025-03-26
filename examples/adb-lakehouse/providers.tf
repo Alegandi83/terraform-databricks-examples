@@ -25,7 +25,13 @@ provider "databricks" {
 }
 
 provider "databricks" {
-  alias = "workspace"
-  host  = module.adb-lakehouse.workspace_url
+  alias = "producer-workspace"
+  host  = module.adb-lakehouse-producer.workspace_url
+  azure_tenant_id = var.tenant_id
+}
+
+provider "databricks" {
+  alias = "consumer-workspace"
+  host  = module.adb-lakehouse-consumer.workspace_url
   azure_tenant_id = var.tenant_id
 }

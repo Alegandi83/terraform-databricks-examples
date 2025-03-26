@@ -54,6 +54,16 @@ output "access_connector_id" {
 }
 
 output "access_connector_principal_id" {
-  value       = azurerm_databricks_access_connector.access_connector.identity[0].principal_id
+  value       = azurerm_databricks_access_connector.access_connector.id
   description = "The Principal ID of the System Assigned Managed Service Identity that is configured on this Access Connector"
+}
+
+output "access_connector_name" {
+  value       = azurerm_databricks_access_connector.access_connector.name
+  description = "The name of the Access Connector"
+}
+
+output "storage_account_name" {
+  value       = azurerm_storage_account.dls.name
+  description = "The name of the workspace storage account"
 }

@@ -3,5 +3,5 @@ resource "databricks_repo" "app_cookbook" {
 }
 
 resource "databricks_repo" "delorean" {
-  url = "https://github.com/Alegandi83/delorean.git"
+  url = "https://github.com/Alegandi83/emmettbrown.git"
 }

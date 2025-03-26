@@ -25,7 +25,7 @@ module "adb-lakehouse-uc-account-principals" {
 locals {
   producer_name = "producer"
 }
-module "adb-lakehouse" {
+module "adb-lakehouse-producer" {
   # With UC by default we need to explicitly create a UC metastore, otherwise it will be created automatically
   depends_on                      = [module.adb-lakehouse-uc-metastore]
   source                          = "../../modules/adb-lakehouse"
@@ -40,8 +40,8 @@ module "adb-lakehouse" {
   create_resource_group           = var.create_resource_group
   managed_resource_group_name     = "rg-${var.deploy_id}-${var.deploy_env}-${local.producer_name}-${var.deploy_ver}-mngd"
   databricks_workspace_name       = "dbw-${var.deploy_id}-${var.deploy_env}-${local.producer_name}-${var.deploy_ver}"
-  data_factory_name               = "adf-${var.deploy_id}-${var.deploy_env}-${local.producer_name}-${var.deploy_ver}"
-  key_vault_name                  = "akv-${var.deploy_id}-${var.deploy_env}-${local.producer_name}-${var.deploy_ver}"
+  data_factory_name               = "" #"adf-${var.deploy_id}-${var.deploy_env}-${local.producer_name}-${var.deploy_ver}"
+  key_vault_name                  = "" #"akv-${var.deploy_id}-${var.deploy_env}-${local.producer_name}-${var.deploy_ver}"
   private_subnet_address_prefixes = var.private_subnet_address_prefixes
   public_subnet_address_prefixes  = var.public_subnet_address_prefixes
   storage_account_name            = "dls${var.deploy_id}${var.deploy_env}${local.producer_name}${var.deploy_ver}"
@@ -52,7 +52,7 @@ module "adb-lakehouse" {
 module "adb-lakehouse-uc-idf-assignment" {
   depends_on         = [module.adb-lakehouse-uc-account-principals]
   source             = "../../modules/uc-idf-assignment"
-  workspace_id       = module.adb-lakehouse.workspace_id
+  workspace_id       = module.adb-lakehouse-producer.workspace_id
   metastore_id       = module.adb-lakehouse-uc-metastore.metastore_id
   service_principals = var.service_principals
   account_groups = {
@@ -89,8 +89,8 @@ module "adb-lakehouse-consumer" {
   create_resource_group           = var.create_resource_group
   managed_resource_group_name     = "rg-${var.deploy_id}-${var.deploy_env}-${local.consumer_name}-${var.deploy_ver}-mngd"
   databricks_workspace_name       = "dbw-${var.deploy_id}-${var.deploy_env}-${local.consumer_name}-${var.deploy_ver}"
-  data_factory_name               = "adf-${var.deploy_id}-${var.deploy_env}-${local.consumer_name}-${var.deploy_ver}"
-  key_vault_name                  = "akv-${var.deploy_id}-${var.deploy_env}-${local.consumer_name}-${var.deploy_ver}"
+  data_factory_name               = "" #"adf-${var.deploy_id}-${var.deploy_env}-${local.consumer_name}-${var.deploy_ver}"
+  key_vault_name                  = "" #"akv-${var.deploy_id}-${var.deploy_env}-${local.consumer_name}-${var.deploy_ver}"
   private_subnet_address_prefixes = var.private_subnet_address_prefixes
   public_subnet_address_prefixes  = var.public_subnet_address_prefixes
   storage_account_name            = "dls${var.deploy_id}${var.deploy_env}${local.consumer_name}${var.deploy_ver}"
@@ -121,22 +121,74 @@ module "adb-lakehouse-other-uc-idf-assignment" {
 }
 
 
+
+
 locals {
   landing_name = "land"
 }
-module "adb-lakehouse-data-assets" {
-  depends_on                     = [module.adb-lakehouse-uc-account-principals]
-  source                         = "../../modules/adb-lakehouse-uc/uc-data-assets"
+module "adb-lakehouse-common-assets" {
+  depends_on                     = [module.adb-lakehouse-uc-metastore]
+  source                         = "../../modules/adb-lakehouse-uc/uc-common-assets"
   location                       = var.location
   storage_credential_name        = "dac-${var.deploy_id}-${var.deploy_env}-${local.metastore_name}-${var.deploy_ver}"
   metastore_id                   = module.adb-lakehouse-uc-metastore.metastore_id
   access_connector_id            = module.adb-lakehouse-uc-metastore.access_connector_principal_id
   landing_external_location_name = "dls${var.deploy_id}${var.deploy_env}${local.landing_name}${var.deploy_ver}"
   landing_adls_path              = format("abfss://%s@%s.dfs.core.windows.net/", "con", "dls${var.deploy_id}${var.deploy_env}${local.landing_name}${var.deploy_ver}")
-  landing_adls_rg                = "rg-${var.deploy_id}-${var.deploy_env}-${local.metastore_name}-${var.deploy_ver}"
+  landing_adls_rg                = module.adb-lakehouse-uc-metastore.shared_resource_group_name
   metastore_admins               = var.metastore_admins
   tags                           = merge(var.tags, { "Domain" = "${local.landing_name}" })
   providers = {
-    databricks = databricks.workspace
+    databricks = databricks.producer-workspace
   }
 }
+
+locals {
+  producer_assets_name = "producer-assets"
+}
+module "adb-lakehouse-producer-workspace-assets" {
+  depends_on                     = [module.adb-lakehouse-metastore-landing]
+  source                         = "../../modules/adb-lakehouse-uc/uc-workspace-assets"
+  access_connector_id            = module.adb-lakehouse-producer.access_connector_principal_id
+  storage_credential_name        = module.adb-lakehouse-producer.access_connector_name
+  external_location_name         = module.adb-lakehouse-producer.storage_account_name
+  adls_path                      = format("abfss://%s@%s.dfs.core.windows.net/", "con", module.adb-lakehouse-producer.storage_account_name)
+  metastore_admins               = var.metastore_admins
+  tags                           = merge(var.tags, { "Domain" = "${local.producer_assets_name}" })
+  providers = {
+    databricks = databricks.producer-workspace
+  }
+}
+
+locals {
+  consumer_assets_name = "consumer-assets"
+}
+module "adb-lakehouse-consumer-workspace-assets" {
+  depends_on                     = [module.adb-lakehouse-producer-workspace-assets]
+  source                         = "../../modules/adb-lakehouse-uc/uc-metastore-assets"
+  access_connector_id            = module.adb-lakehouse-consumer.access_connector_principal_id
+  storage_credential_name        = module.adb-lakehouse-consumer.access_connector_name
+  external_location_name         = module.adb-lakehouse-consumer.storage_account_name
+  adls_path                      = format("abfss://%s@%s.dfs.core.windows.net/", "con", module.adb-lakehouse-consumer.storage_account_name)
+  metastore_admins               = var.metastore_admins
+  tags                           = merge(var.tags, { "Domain" = "${local.producer_assets_name}" })
+  providers = {
+    databricks = databricks.consumer-workspace
+  }
+}
+
+locals {
+  assets_name = "data-assets"
+}
+#module "adb-lakehouse-data-assets" {
+#  depends_on                     = [module.adb-lakehouse-consumer-workspace-assets]
+#  source                         = "../../modules/adb-lakehouse-uc/uc-data-assets"
+#  location                       = var.location
+#  storage_credential_name        = "dac-${var.deploy_id}-${var.deploy_env}-${local.metastore_name}-${var.deploy_ver}"
+#  metastore_id                   = module.adb-lakehouse-uc-metastore.metastore_id
+#  metastore_admins               = var.metastore_admins
+#  tags                           = merge(var.tags, { "Domain" = "${local.assets_name}" })
+#  providers = {
+#    databricks = databricks.producer-workspace
+#  }
+#}

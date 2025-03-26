@@ -11,3 +11,8 @@ output "access_connector_principal_id" {
   value       = azurerm_databricks_access_connector.access_connector.identity[0].principal_id
   description = "The Principal ID of the System Assigned Managed Service Identity that is configured on this Access Connector"
 }
+
+output "shared_resource_group_name" {
+  value       = var.shared_resource_group_name
+  description = "The resource group name where the storage account of the metastore is deployed"
+}
